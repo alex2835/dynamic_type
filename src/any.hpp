@@ -62,7 +62,7 @@ public:
     {
         if ( mType != other.mType )
             return mType < other.mType;
-            
+
         switch (mType)
         {
         case Type::None:
