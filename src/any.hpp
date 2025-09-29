@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <vector>
 #include <variant>
 #include <print>
 
@@ -9,6 +10,7 @@ public:
     enum class Type
     {
         None,
+        Bool,
         Int,
         Float,
         String,
@@ -20,6 +22,13 @@ public:
     using Array = std::vector<Any>;
 
     Any() = default;
+    ~Any() = default;
+    Any(const Any&) = default;
+    Any& operator=(const Any&) = default;
+    Any(Any&&) = default;
+    Any& operator=(Any&&) = default;
+
+    Any( bool value ) { mType = Type::Bool; mStorage = value; }
     Any( int value ) { mType = Type::Int; mStorage = value; }
     Any( long long value ) { mType = Type::Int; mStorage = value; }
     Any( float value ) { mType = Type::Float; mStorage = value; }
@@ -30,6 +39,7 @@ public:
     Any( const Map& value ) { mType = Type::Map; mStorage = value; }
     Any( const Array& value ) { mType = Type::Array; mStorage = value; }
 
+    Any& operator=( bool value ) { mType = Type::Bool; mStorage = value; return *this; }
     Any& operator=( int value ) { mType = Type::Int; mStorage = value; return *this; }
     Any& operator=( long long value ) { mType = Type::Int; mStorage = value; return *this; }
     Any& operator=( float value ) { mType = Type::Float; mStorage = value; return *this; }
@@ -39,6 +49,7 @@ public:
     Any& operator=( const Array& value ) { mType = Type::Array; mStorage = value; return *this; }
 
     Type getType() const { return mType; }
+    bool isBool() const { return mType == Type::Bool; }
     bool isNone() const { return mType == Type::None; }
     bool isInt() const { return mType == Type::Int; }
     bool isFloat() const { return mType == Type::Float; }
@@ -46,12 +57,14 @@ public:
     bool isArray() const { return mType == Type::Array; }
     bool isMap() const { return mType == Type::Map; }
     
+    bool& getBool() { return std::get<bool>( mStorage ); }
     long long& getInt() { return std::get<long long>( mStorage ); }
     double& getFloat() { return std::get<double>( mStorage ); }
     String& getString() { return std::get<String>( mStorage ); }
     Map& getMap() { return std::get<Map>( mStorage ); }
     Array& getArray() { return std::get<Array>( mStorage ); }
 
+    const bool& getBool() const { return std::get<bool>( mStorage ); }
     const long long& getInt() const { return std::get<long long>( mStorage ); }
     const double& getFloat() const { return std::get<double>( mStorage ); }
     const String& getString() const { return std::get<String>( mStorage ); }
@@ -67,6 +80,8 @@ public:
         {
         case Type::None:
             return false;
+        case Type::Bool:
+            return getBool() < other.getBool();
         case Type::Int:
             return getInt() < other.getInt();
         case Type::Float:
@@ -83,6 +98,7 @@ public:
 private:
     Type mType = Type::None;
     std::variant<
+        bool,
         long long,
         double,
         String,
